@@ -21,6 +21,7 @@ public class Problema {
     public List<Colaborador> colaboradores = new ArrayList<>();
     public List<Proyecto> proyectos = new ArrayList<>();
     public List<String> idiomas = new ArrayList<>();
+    public Map<Integer, List<Proyecto>> proyectosMap = new HashMap<>();
 
     public Map<Integer, Proyecto> proyectosEnEjecucion = new HashMap<>();
     public List<Integer> proyectosTerminados = new ArrayList<>();
@@ -93,49 +94,48 @@ public class Problema {
         Integer dias = 0;
         Integer diasSinNada = 0;
         Integer auxPuntuacion = 0;
+        Boolean buscarProyectos = true;
 
         // cada dia la misma historia
         while(control) {
+            Integer auxColaboradoresNoAfk = 0;
             // buscamos proyectos
-            for (int i = 0; i < proyectos.size(); i++) {
-                Proyecto proyecto = proyectos.get(i);
-                if(proyectosTerminados.contains(proyecto.id) || proyectosEnEjecucion.containsKey(proyecto.id)){
-                    continue;
-                }
-
-                List<Integer> colaboradoresCandidatos = new ArrayList<>();
-                Map<Integer, String> colaboradoresIdiomaCandidatos = new HashMap<>();
-
-                for (Idioma idioma : proyecto.idiomas) {
-                    if(proyecto.nombre.equals("WearOSProv2")){
-                        //logger.info("");
+            if(buscarProyectos) {
+                buscarProyectos = false;
+                for (int i = 0; i < proyectos.size(); i++) {
+                    Proyecto proyecto = proyectos.get(i);
+                    if(proyectosTerminados.contains(proyecto.id) || proyectosEnEjecucion.containsKey(proyecto.id)){
+                        continue;
                     }
-                    Colaborador can = buscarColaborador(idioma, colaboradoresCandidatos);
-                    if(can == null) {
-                        colaboradoresCandidatos = new ArrayList<>();
-                        colaboradoresIdiomaCandidatos = new HashMap<>();
-                        break;
-                    }
-                    colaboradoresCandidatos.add(can.id);
-                    colaboradoresIdiomaCandidatos.put(can.id, idioma.nombre);
-                }
 
-                if(colaboradoresCandidatos.size() == 0) {
-                    continue;
+                    List<Integer> colaboradoresCandidatos = new ArrayList<>();
+                    Map<Integer, String> colaboradoresIdiomaCandidatos = new HashMap<>();
+
+                    for (Idioma idioma : proyecto.idiomas) {
+                        Colaborador can = buscarColaborador(idioma, colaboradoresCandidatos);
+                        if(can == null) {
+                            colaboradoresCandidatos = new ArrayList<>();
+                            colaboradoresIdiomaCandidatos = new HashMap<>();
+                            break;
+                        }
+                        colaboradoresCandidatos.add(can.id);
+                        colaboradoresIdiomaCandidatos.put(can.id, idioma.nombre);
+                    }
+
+                    if(colaboradoresCandidatos.size() == 0) {
+                        continue;
+                    }
+                    for (Integer id: colaboradoresCandidatos) {
+                        proyecto.asignados.add(colaboradores.get(id));
+                        colaboradoresEnUso.put(id, id);
+                        proyecto.colaboradorIdioma.put(id, colaboradoresIdiomaCandidatos.get(id));
+                    }
+                    proyectosEnEjecucion.put(proyecto.id, proyecto);
                 }
-                if(proyecto.nombre.equals("WearOSProv2")){
-                    //logger.info("");
-                }
-                for (Integer id: colaboradoresCandidatos) {
-                    proyecto.asignados.add(colaboradores.get(id));
-                    colaboradoresEnUso.put(id, id);
-                    proyecto.colaboradorIdioma.put(id, colaboradoresIdiomaCandidatos.get(id));
-                }
-                proyectosEnEjecucion.put(proyecto.id, proyecto);
             }
 
-            // proyectos ejecutandose
 
+            // proyectos ejecutandose
             List<Integer> proyectosABorrar = new ArrayList<>();
             List<Integer> colaboradoresABorrar = new ArrayList<>();
             for(Integer id : proyectosEnEjecucion.keySet()) {
@@ -154,9 +154,6 @@ public class Problema {
                                 break;
                             }
                         }
-                        if(colaboradores.get(idC).nombre.equals("SundarL")){
-                            //logger.info("patata");
-                        }
                         if(colaboradores.get(idC).idiomas.get(proyecto.colaboradorIdioma.get(idC)).nivel == nivel) {
                             colaboradores.get(idC).idiomas.get(proyecto.colaboradorIdioma.get(idC)).nivel++;
                         }
@@ -167,6 +164,7 @@ public class Problema {
             }
             for (Integer id : proyectosABorrar) {
                 proyectosEnEjecucion.remove(id);
+                buscarProyectos = true;
             }
             for (Integer id : colaboradoresABorrar) {
                 colaboradoresEnUso.remove(id);
@@ -176,13 +174,10 @@ public class Problema {
                 control = false;
             }
             dias++;
-            if(dias == 100000) {
-                control = false;
-            }
             if(proyectosEnEjecucion.size() == 0) {
                 diasSinNada++;
-                logger.info(dias.toString());
-                logger.info(diasSinNada.toString());
+                logger.info("Dias: " + dias.toString());
+                logger.info("Dias sin nada: " + diasSinNada.toString());
             } else {
                 diasSinNada = 0;
             }
@@ -223,9 +218,6 @@ public class Problema {
             }
             for(String idiomaS : colaborador.idiomas.keySet()) {
                 Idioma idiomaCol = colaborador.idiomas.get(idiomaS);
-                if(idioma.nombre.equals("PHP-py") && colaborador.nombre.equals("SundarL")){
-                    //logger.info("");
-                }
                 if(idiomaCol.nombre.equals(idioma.nombre) && idiomaCol.nivel >= idioma.nivel) {
                     return colaborador;
                 }

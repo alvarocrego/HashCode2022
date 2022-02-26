@@ -8,8 +8,8 @@ public class HashCode2022Application {
 
     public static void main(String[] args) {
         SpringApplication.run(HashCode2022Application.class, args);
-        evaluate("a_an_example.in.txt", "a_an_example.out.txt");
-        evaluate("b_better_start_small.in.txt", "b_better_start_small.out.txt");
+        //evaluate("a_an_example.in.txt", "a_an_example.out.txt");
+        //evaluate("b_better_start_small.in.txt", "b_better_start_small.out.txt");
         //evaluate("c_collaboration.in.txt", "c_collaboration.out.txt");
         //evaluate("d_dense_schedule.in.txt", "d_dense_schedule.out.txt");
         //evaluate("e_exceptional_skills.in.txt", "e_exceptional_skills.out.txt");
